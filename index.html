@@ -1,0 +1,433 @@
+<!-- Crear un generador de tarjetas de informacion sobre peliculas, series y canciones
+ pide al usuario que llene la siguiente informacion:
+ 1. titulo
+ 2. empresa o autor
+ 3. año de creacion
+ 4 url de la imagen
+ al dar clicc en el boto de generar debes ,pstrar una tarjeta con buen diseño y la imagen de mostrarse 
+ visualmente en lugar del url
+  -->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Oswald:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-B/GM4XqrwHnWXNOWMbloTmrYXZg10cakYGmpfsR/bbzQ6JAJI4ihuyADKLnBgrCe" crossorigin="anonymous">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-1a/pXj49ZQ1aHEmrJ+gMw1otqoVsYwlEnlD8mIfY2TV03r20Y0CN7uqx1tQogjPL" crossorigin="anonymous"></script>
+    <style>
+        :root {
+            --fondo: #1d1828;
+            --fondo-2: #272035;
+            --tinta: #f3ece3;
+            --tinta-suave: #b8aebb;
+            --tan: #b19276;
+            --acento: #4cc9b0;
+            --pelicula: linear-gradient(145deg, #c8553d, #5b1f3a);
+            --serie: linear-gradient(145deg, #3a86c8, #1b2a63);
+            --musica: linear-gradient(145deg, #4cc9b0, #1d5b63);
+        }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; }
+        body {
+            background: var(--fondo);
+            color: var(--tinta);
+            font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        /* ---------- HERO con tutorial de fondo ---------- */
+        .hero {
+            position: relative;
+            min-height: 78vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 64px 20px;
+            overflow: hidden;
+            isolation: isolate;
+        }
+        /* El tutorial vive en el fondo: lineas enormes y tenues que se encienden una a una */
+        .tutorial-fondo {
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 6px;
+            padding: 0 5vw;
+            transform: translate(var(--px, 0px), var(--py, 0px));
+            transition: transform .2s ease-out;
+        }
+        .paso {
+            all: unset;
+            cursor: pointer;
+            font-family: 'Indie Flower', cursive;
+            font-size: clamp(38px, 8vw, 104px);
+            line-height: 1.05;
+            color: transparent;
+            -webkit-text-stroke: 1.5px rgba(177, 146, 118, .28);
+            transition: color .5s, -webkit-text-stroke-color .5s, transform .5s;
+            white-space: nowrap;
+        }
+        .paso:hover { -webkit-text-stroke-color: rgba(177, 146, 118, .7); }
+        .paso:focus-visible { outline: 2px solid var(--acento); outline-offset: 4px; }
+        .paso.activo {
+            color: rgba(177, 146, 118, .22);
+            -webkit-text-stroke-color: var(--tan);
+            transform: translateX(2vw);
+        }
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            background: radial-gradient(ellipse at center, rgba(29,24,40,.92) 0%, rgba(29,24,40,.55) 55%, rgba(29,24,40,.2) 100%);
+            pointer-events: none;
+        }
+        .hero-contenido {
+            max-width: 620px;
+            text-align: center;
+        }
+        .hero h1 {
+            font-family: 'Indie Flower', cursive;
+            font-size: clamp(34px, 5.5vw, 60px);
+            line-height: 1.1;
+            margin: 0 0 14px;
+            font-weight: 400;
+        }
+        .hero p.sub { margin: 0 auto 22px; color: var(--tinta-suave); max-width: 46ch; }
+        .consola {
+            min-height: 96px;
+            background: rgba(39, 32, 53, .85);
+            border: 1px solid rgba(177,146,118,.35);
+            border-radius: 12px;
+            padding: 16px 20px;
+            text-align: left;
+            font-size: 17px;
+            backdrop-filter: blur(4px);
+        }
+        .consola .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.1em;
+            background: var(--acento);
+            vertical-align: text-bottom;
+            margin-left: 2px;
+            animation: parpadeo 1s steps(1) infinite;
+        }
+        @keyframes parpadeo { 50% { opacity: 0; } }
+        .hero-acciones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 22px;
+        }
+        .btn-cat {
+            text-decoration: none;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: transform .15s, filter .15s;
+        }
+        .btn-cat:hover { transform: translateY(-2px); filter: brightness(1.12); }
+        .btn-cat:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+        .btn-cat.pelicula { background: #c8553d; }
+        .btn-cat.serie { background: #3a86c8; }
+        .btn-cat.musica { background: #2a9d8a; }
+
+        /* ---------- CARRUSEL animado ---------- */
+        .escaparate { padding: 44px 0 56px; background: var(--fondo-2); }
+        .escaparate h2 {
+            font-family: 'Indie Flower', cursive;
+            font-weight: 400;
+            font-size: clamp(26px, 4vw, 38px);
+            text-align: center;
+            margin: 0 20px 6px;
+        }
+        .escaparate .nota { text-align: center; color: var(--tinta-suave); margin: 0 20px 30px; }
+        .cinta {
+            overflow: hidden;
+            mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+            -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+            padding: 10px 0;
+        }
+        .pista {
+            display: flex;
+            gap: 18px;
+            width: max-content;
+            animation: deslizar 70s linear infinite;
+        }
+        .cinta.inversa .pista { animation-direction: reverse; animation-duration: 85s; }
+        .cinta:hover .pista { animation-play-state: paused; }
+        @keyframes deslizar { to { transform: translateX(calc(-50% - 9px)); } }
+
+        .pista { align-items: center; }
+
+        /* Poster (peliculas y series), igual que el generador */
+        .mini-poster {
+            width: 200px;
+            flex: none;
+            aspect-ratio: 2 / 3;
+            background: #cfcbc4;
+            color: #1c1c1c;
+            padding: 8px 8px 14px;
+            font-family: 'Oswald', 'Arial Narrow', sans-serif;
+            box-shadow: 0 8px 20px rgba(0,0,0,.4);
+            transition: transform .25s;
+        }
+        .mini-poster:hover { transform: translateY(-8px) rotate(-1.5deg) scale(1.04); }
+        .mini-poster .portada {
+            aspect-ratio: 1.1 / 1;
+            display: grid;
+            place-items: center;
+            font-size: 56px;
+        }
+        .portada.pelicula { background: var(--pelicula); }
+        .portada.serie { background: var(--serie); }
+        .mini-poster .enc { display: flex; align-items: baseline; gap: 8px; margin: 12px 4px 4px; }
+        .mini-poster h3 { margin: 0; font-size: 22px; line-height: 1; font-weight: 700; text-transform: uppercase; }
+        .mini-poster .anio { font-size: 15px; color: #6f6b64; }
+        .mini-poster .fila { display: grid; grid-template-columns: 58px 1fr; gap: 4px; margin: 5px 4px 0; align-items: baseline; }
+        .mini-poster .fila.reparto { margin-top: 12px; }
+        .mini-poster .etq { font-size: 10px; font-weight: 300; color: #5d5953; }
+        .mini-poster .vals { font-size: 10px; font-weight: 500; text-transform: uppercase; }
+
+        /* Disco de vinilo (musica), con la imagen al centro */
+        .mini-vinilo { width: 200px; flex: none; text-align: center; transition: transform .25s; }
+        .mini-vinilo:hover { transform: translateY(-8px) scale(1.04); }
+        .disco { position: relative; width: 200px; aspect-ratio: 1; }
+        .vinilo {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: repeating-radial-gradient(circle at 50% 50%, #0e0e11 0 2px, #1b1b20 2px 3px);
+            box-shadow: inset 0 0 0 5px #08080a, 0 10px 22px rgba(0,0,0,.5);
+            animation: girar 5s linear infinite;
+        }
+        .cinta:hover .vinilo { animation-play-state: paused; }
+        @keyframes girar { to { transform: rotate(360deg); } }
+        .brillo {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            pointer-events: none;
+            background: conic-gradient(from 20deg, transparent 0 25deg, rgba(255,255,255,.16) 55deg, transparent 85deg 195deg, rgba(255,255,255,.12) 235deg, transparent 265deg);
+        }
+        .etiqueta {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 40%;
+            aspect-ratio: 1;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 30px;
+            background: var(--musica);
+            box-shadow: 0 0 0 3px #08080a;
+        }
+        .agujero {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 5.5%;
+            aspect-ratio: 1;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: var(--fondo-2);
+            box-shadow: 0 0 0 2px rgba(0,0,0,.55);
+        }
+        .mini-vinilo h3 { margin: 14px 0 0; font-family: 'Indie Flower', cursive; font-weight: 400; font-size: 24px; line-height: 1.1; }
+        .mini-vinilo .autor { margin: 2px 0 0; color: var(--tan); font-size: 15px; }
+        .mini-vinilo .anio { margin: 2px 0 0; color: var(--tinta-suave); font-size: 13px; }
+
+        /* ---------- FOOTER ---------- */
+        footer {
+            background: #130f1b;
+            padding: 36px 20px 28px;
+            text-align: center;
+            color: var(--tinta-suave);
+            font-size: 14px;
+        }
+        footer .marca { font-family: 'Indie Flower', cursive; font-size: 26px; color: var(--tinta); margin: 0 0 6px; }
+        footer p { margin: 4px 0; }
+        footer .enlaces { display: flex; gap: 18px; justify-content: center; margin: 14px 0; flex-wrap: wrap; }
+        footer a { color: var(--tan); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .pista { animation-duration: 200s; }
+            .consola .cursor { animation: none; }
+            .vinilo { animation: none; }
+            .tutorial-fondo, .paso { transition: none; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar sm:navbar-expand bg-1 fg-2">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="inicio.html">F_____</a>
+            <button class="btn-icon navbar-toggler" type="button" data-bs-toggle="drawer" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon" aria-hidden="true"></span>
+            </button>
+            <dialog class="drawer drawer-end" tabindex="-1" id="navbarNavAltMarkup" aria-labelledby="navbarNavAltMarkupLabel">
+                <div class="drawer-header">
+                    <h5 class="drawer-title" id="navbarNavAltMarkupLabel">Menu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="drawer" aria-label="Close"></button>
+                </div>
+                <div class="drawer-body">
+                    <div class="nav nav-pills navbar-nav">
+                        <a class="nav-link active" aria-current="page" href="peliculas.html">peliculas</a>
+                        <a class="nav-link" href="series.html">series</a>
+                        <a class="nav-link" href="musica.html">Musica</a>
+                    </div>
+                </div>
+            </dialog>
+        </div>
+    </nav>
+
+    <!-- HERO: tutorial interactivo de fondo -->
+    <header class="hero" id="hero">
+        <div class="tutorial-fondo" id="tutorialFondo" aria-hidden="false">
+            <button class="paso" data-paso="0">Elige qué crear</button>
+            <button class="paso" data-paso="1">Escribe los datos</button>
+            <button class="paso" data-paso="2">Pega la imagen</button>
+            <button class="paso" data-paso="3">Genera tu tarjeta</button>
+        </div>
+
+        <div class="hero-contenido">
+            <h1>Crea tarjetas de películas, series y música</h1>
+            <p class="sub">Llena cuatro datos y obtén una tarjeta con tu portada. Toca cualquier paso del fondo para ver cómo funciona.</p>
+            <div class="consola" aria-live="polite">
+                <span id="textoTutorial"></span><span class="cursor" aria-hidden="true"></span>
+            </div>
+            <div class="hero-acciones">
+                <a class="btn-cat pelicula" href="peliculas.html">Crear película</a>
+                <a class="btn-cat serie" href="series.html">Crear serie</a>
+                <a class="btn-cat musica" href="musica.html">Crear canción</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- CARRUSEL de ejemplo, en movimiento continuo -->
+    <section class="escaparate" aria-label="Ejemplos de tarjetas">
+        <h2>Así se ven tus tarjetas</h2>
+        <p class="nota">Ejemplos inventados. Pasa el cursor para pausar.</p>
+        <div class="cinta"><div class="pista" id="pista1"></div></div>
+        <div class="cinta inversa"><div class="pista" id="pista2"></div></div>
+    </section>
+
+    <footer>
+        <p class="marca">F_____</p>
+        <p>Creador de tarjetas de películas, series y música.</p>
+        <div class="enlaces">
+            <a href="peliculas.html">Películas</a>
+            <a href="series.html">Series</a>
+            <a href="musica.html">Música</a>
+        </div>
+        <p>Diseño y programación: <strong>F_____</strong></p>
+        <p>Hecho con HTML, CSS, JavaScript y Bootstrap.</p>
+        <p>© <span id="anioActual"></span> Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        // ---------- Tutorial interactivo ----------
+        const pasos = [
+            "Paso 1. Entra a Películas, Series o Música según lo que quieras crear.",
+            "Paso 2. Escribe el título, la empresa o autor y el año de creación.",
+            "Paso 3. Pega la URL de una imagen. La tarjeta mostrará la imagen, no el enlace.",
+            "Paso 4. Da clic en Generar tarjeta y tu tarjeta aparece lista."
+        ];
+        const botones = document.querySelectorAll('.paso');
+        const salida = document.getElementById('textoTutorial');
+        let actual = 0, escribiendo = null, auto = null;
+
+        function mostrarPaso(i) {
+            actual = i;
+            botones.forEach((b, n) => b.classList.toggle('activo', n === i));
+            clearTimeout(escribiendo);
+            salida.textContent = '';
+            const texto = pasos[i];
+            let c = 0;
+            (function escribir() {
+                salida.textContent = texto.slice(0, ++c);
+                if (c < texto.length) escribiendo = setTimeout(escribir, 28);
+            })();
+        }
+        function iniciarAuto() {
+            clearInterval(auto);
+            auto = setInterval(() => mostrarPaso((actual + 1) % pasos.length), 5500);
+        }
+        botones.forEach((b, i) => b.addEventListener('click', () => { mostrarPaso(i); iniciarAuto(); }));
+        mostrarPaso(0);
+        iniciarAuto();
+
+        // El fondo se desplaza un poco con el cursor
+        const hero = document.getElementById('hero');
+        const fondo = document.getElementById('tutorialFondo');
+        hero.addEventListener('mousemove', e => {
+            const r = hero.getBoundingClientRect();
+            fondo.style.setProperty('--px', ((e.clientX - r.left) / r.width - .5) * -24 + 'px');
+            fondo.style.setProperty('--py', ((e.clientY - r.top) / r.height - .5) * -16 + 'px');
+        });
+
+        // ---------- Carrusel ----------
+        const ejemplos = [
+            // fila 1
+            { tipo: "pelicula", t: "Noche en el faro", y: 2019, genero: "Drama, Misterio", dir: "Ana Beltrán", rep: "Marta Ríos, Leo Campos, Inés Duarte", e: "🏮" },
+            { tipo: "musica", t: "Rumbo al sur", a: "Luna Vega", y: 2021, e: "🎵" },
+            { tipo: "serie", t: "Ciudad de cristal", y: 2022, genero: "Ciencia ficción", dir: "Pablo Serrano", rep: "Eva Montes, Hugo Lara, Sara Peña", e: "🏙️" },
+            { tipo: "pelicula", t: "El último tren", y: 2015, genero: "Aventura", dir: "Rafael Oro", rep: "Tomás Vidal, Nora Gil, Ivo Casas", e: "🚂" },
+            { tipo: "musica", t: "Bajo la lluvia", a: "Los Faroles", y: 2018, e: "🌧️" },
+            { tipo: "serie", t: "Código rojo", y: 2023, genero: "Suspenso", dir: "Clara Nieto", rep: "Diego Mora, Lía Soto, Raúl Pardo", e: "🕵️" },
+            // fila 2
+            { tipo: "musica", t: "Pulso", a: "DJ Cobalto", y: 2024, e: "🎧" },
+            { tipo: "pelicula", t: "Mar de ceniza", y: 2020, genero: "Acción, Drama", dir: "Julia Ferrer", rep: "Bruno Salas, Olga Ruiz, Max Torres", e: "🌊" },
+            { tipo: "serie", t: "La casa del lago", y: 2017, genero: "Terror", dir: "Iván Prado", rep: "Elena Cruz, Saúl Vera, Mía Lozano", e: "🏡" },
+            { tipo: "musica", t: "Verano eterno", a: "Mar y Sol", y: 2014, e: "☀️" },
+            { tipo: "pelicula", t: "Estrellas de papel", y: 2016, genero: "Comedia", dir: "Lucas Ibarra", rep: "Paula Mena, Nico Rey, Alma Cruz", e: "⭐" },
+            { tipo: "serie", t: "Frontera", y: 2021, genero: "Western", dir: "Gaby Ortiz", rep: "Samuel León, Rita Paz, Omar Díaz", e: "🏜️" }
+        ];
+        function filaHTML(etq, valor, extra) {
+            return `<div class="fila ${extra || ''}"><span class="etq">${etq}</span><span class="vals">${valor}</span></div>`;
+        }
+        function tarjetaHTML(d) {
+            if (d.tipo === 'musica') {
+                return `<article class="mini-vinilo">
+                    <div class="disco" aria-hidden="true">
+                        <div class="vinilo"><div class="etiqueta">${d.e}</div><span class="agujero"></span></div>
+                        <div class="brillo"></div>
+                    </div>
+                    <h3>${d.t}</h3>
+                    <p class="autor">${d.a}</p>
+                    <p class="anio">${d.y}</p>
+                </article>`;
+            }
+            const creador = d.tipo === 'serie' ? 'creada por' : 'dirigida por';
+            return `<article class="mini-poster">
+                <div class="portada ${d.tipo}" aria-hidden="true">${d.e}</div>
+                <div class="enc"><h3>${d.t}</h3><span class="anio">${d.y}</span></div>
+                ${filaHTML('género', d.genero)}
+                ${filaHTML(creador, d.dir)}
+                ${filaHTML('reparto', d.rep, 'reparto')}
+            </article>`;
+        }
+        function llenar(id, lista) {
+            const html = lista.map(tarjetaHTML).join('');
+            document.getElementById(id).innerHTML = html + html + html + html; // 4 copias para que no queden huecos en pantallas anchas
+        }
+        llenar('pista1', ejemplos.slice(0, 6));
+        llenar('pista2', ejemplos.slice(6));
+
+        document.getElementById('anioActual').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>

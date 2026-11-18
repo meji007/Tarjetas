@@ -1,0 +1,282 @@
+<!-- Crear un generador de tarjetas de informacion sobre peliculas, series y canciones
+ pide al usuario que llene la siguiente informacion:
+ 1. titulo
+ 2. empresa o autor
+ 3. año de creacion
+ 4 url de la imagen
+ al dar clicc en el boto de generar debes ,pstrar una tarjeta con buen diseño y la imagen de mostrarse 
+ visualmente en lugar del url
+  -->
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>musica</title>
+    <style>
+       body { /* Estilos de toda la pagina */
+            margin: 0; /* Quita el margen blanco que trae el navegador */
+            background: #1d1828; /* Color de fondo: morado muy oscuro */
+            color: #f3ece3; /* Color del texto: blanco calido */
+            font-family: system-ui, -apple-system, "Segoe UI", sans-serif; /* Letra normal del sistema */
+        } /* Fin de body */
+
+        #Creador { 
+           background-color: #b19276; /* Color de fondo de tu formulario */
+            color: #2a1f17; /* Color del texto dentro del formulario */
+            padding: 20px; /* Espacio interior */
+            border-radius: 10px; /* Esquinas redondeadas */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25); /* Sombra suave debajo */
+            width: 320px; /* Ancho fijo del formulario */
+            font-family: 'Indie Flower', cursive; /* Letra manuscrita */
+        }
+         #Creador h1 { font-size: 24px; margin: 0 0 6px; font-weight: 400; } /* Titulo del formulario: tamaño, sin margen arriba, sin negritas */
+        #Creador p { margin: 12px 0 3px; font-size: 18px; } /* Las etiquetas (Titulo, Autor...): espacio arriba y abajo */
+        #Creador input { /* Todas las cajas de texto */
+            width: 100%; /* Ocupan todo el ancho del formulario */
+            padding: 8px 10px; /* Espacio interior para que el texto no pegue en el borde */
+            border: none; /* Sin borde */
+            border-radius: 5px; /* Esquinas redondeadas */
+            font-size: 15px; /* Tamaño de lo que escribes */
+            font-family: system-ui, sans-serif; /* Letra clara y legible para escribir */
+            background: #f6efe7; /* Fondo claro de la caja */
+            color: #2a1f17; /* Color del texto que escribes */
+        } /* Fin de input */
+
+        #Creador input:focus-visible { outline: 2px solid #1d1828; } /* Contorno oscuro cuando haces clic o llegas con el teclado */
+        #Creador .ayuda { font-size: 14px; margin: 2px 0 0; opacity: .8; font-family: system-ui, sans-serif; } /* Texto pequeño de ayuda debajo de un campo */
+        #Creador .error { color: #7a1d12; font-family: system-ui, sans-serif; font-size: 14px; min-height: 18px; margin: 10px 0 0; } /* Mensaje de error en rojo oscuro */
+        .contenedor { /* Caja que acomoda el formulario y la tarjeta */
+            display: flex; /* Pone los hijos uno al lado del otro */
+            flex-wrap: wrap; /* Si no caben, el segundo baja (util en celular) */
+            gap: 36px; /* Espacio entre el formulario y la tarjeta */
+            align-items: flex-start; /* Los alinea arriba */
+            justify-content: center; /* Los centra horizontalmente */
+            padding: 28px 20px 56px; /* Espacio interior: arriba, lados, abajo */
+        } /* Fin de .contenedor */
+        #generar { /* El boton Generar Tarjeta */
+            background-color: #4CAF50; /* Verde */
+            color: white; /* Texto blanco */
+            padding: 10px 20px; /* Espacio interior del boton */
+            border: none; /* Sin borde */
+            border-radius: 5px; /* Esquinas redondeadas */
+            cursor: pointer; /* El cursor cambia a manita al pasar encima */
+            font-size: 16px; /* Tamaño del texto del boton */
+            margin-top: 6px; /* Separacion con lo de arriba */
+            text-align: center; /* Centra el texto del boton */
+            text-justify: center; /* Centra el texto del boton */
+
+            margin: 0 auto;
+
+        } /* Fin de #generar */
+        #generar:hover { filter: brightness(1.1); } /* Al pasar el cursor, el boton se aclara un poco */
+        #generar:focus-visible { outline: 2px solid #1d1828; outline-offset: 2px; } /* Contorno al usar el teclado */
+
+        #resultado { flex: 1 1 360px; display: flex; justify-content: center; min-height: 200px; } /* Zona donde aparece la tarjeta: crece, centra su contenido */
+
+        .vacio { /* Mensaje que se ve antes de generar */
+            align-self: center; /* Lo centra verticalmente */
+            color: #b8aebb; /* Gris suave */
+            text-align: center; /* Texto centrado */
+            max-width: 30ch; /* Ancho maximo de unos 30 caracteres */
+            font-family: 'Indie Flower', cursive; /* Letra manuscrita */
+            font-size: 24px; /* Tamaño grande */
+        } /* Fin de .vacio */
+        /* ================= TARJETA DE DISCO DE VINILO ================= */
+
+        .musica-card { width: 340px; max-width: 100%; text-align: center; } /* Caja de toda la tarjeta: ancho fijo, nunca mas ancha que la pantalla, texto centrado */
+
+        .disco { position: relative; width: 100%; aspect-ratio: 1; } /* Contenedor cuadrado del disco; "relative" sirve para colocar capas encima */
+
+        .vinilo { /* El disco negro, que es lo que gira */
+            position: absolute; /* Se coloca dentro de .disco */
+            inset: 0; /* Pegado a los 4 lados, o sea, llena todo .disco */
+            border-radius: 50%; /* 50% convierte el cuadrado en circulo */
+            background: repeating-radial-gradient(circle at 50% 50%, #0e0e11 0 2px, #1b1b20 2px 3px); /* Anillos concentricos que se repiten: son los surcos */
+            box-shadow: inset 0 0 0 7px #08080a, 0 16px 34px rgba(0,0,0,.55); /* Borde oscuro interior + sombra exterior para dar volumen */
+            animation: girar 5s linear infinite; /* Aplica la animacion "girar": 5 segundos, velocidad constante, sin parar */
+        } /* Fin de .vinilo */
+
+        .vinilo.pausa { animation-play-state: paused; } /* Si el disco tiene la clase "pausa", la animacion se congela */
+
+        @keyframes girar { to { transform: rotate(360deg); } } /* Define la animacion: termina con el disco girado una vuelta completa */
+
+        .brillo { /* Reflejo de luz; no gira porque no esta dentro de .vinilo */
+            position: absolute; /* Se coloca encima del disco */
+            inset: 0; /* Cubre todo el disco */
+            border-radius: 50%; /* Con forma de circulo */
+            pointer-events: none; /* Los clics lo atraviesan, no estorba */
+            background: conic-gradient(from 20deg, transparent 0 25deg, rgba(255,255,255,.16) 55deg, transparent 85deg 195deg, rgba(255,255,255,.12) 235deg, transparent 265deg); /* Dos franjas blancas suaves alrededor del centro, como luz en el disco */
+        } /* Fin de .brillo */
+
+        .etiqueta { /* El circulo del centro: aqui va TU imagen, sin hueco encima */
+            position: absolute; /* Se coloca dentro del disco */
+            top: 50%; left: 50%; /* Su esquina superior izquierda va al centro del disco */
+            width: 42%; /* Ocupa el 42% del ancho del disco */
+            aspect-ratio: 1; /* Cuadrado perfecto (luego se vuelve circulo) */
+            transform: translate(-50%, -50%); /* Lo regresa la mitad de su tamaño para que quede centrado de verdad */
+            border-radius: 50%; /* Forma de circulo */
+            overflow: hidden; /* Recorta lo que se salga del circulo (la imagen) */
+            background: #b19276; /* Color de respaldo si no hay imagen */
+            display: grid; /* Para centrar el simbolo ♪ cuando no hay imagen */
+            place-items: center; /* Centra horizontal y verticalmente */
+            font-size: 44px; /* Tamaño del simbolo ♪ */
+            color: #2a1f17; /* Color del simbolo ♪ */
+            box-shadow: 0 0 0 4px #08080a; /* Aro negro alrededor de la etiqueta */
+        } /* Fin de .etiqueta */
+
+        .etiqueta img { width: 100%; height: 100%; object-fit: cover; display: block; } /* La imagen llena el circulo; "cover" la recorta sin deformarla */
+
+        .musica-card .info { margin-top: 26px; } /* Separa los textos del disco */
+
+        .musica-card h2 { /* Titulo de la cancion */
+            margin: 0; /* Sin margen */
+            font-family: 'Indie Flower', cursive; /* Letra manuscrita */
+            font-weight: 400; /* Grosor normal */
+            font-size: 34px; /* Tamaño grande */
+            line-height: 1.1; /* Poco espacio entre lineas */
+            overflow-wrap: anywhere; /* Si el titulo es larguisimo, se parte en vez de salirse */
+        } /* Fin de h2 */
+
+        .musica-card .autor { margin: 4px 0 14px; color: #b19276; font-size: 18px; } /* Nombre del autor: color cafe claro */
+
+        .musica-card .datos { display: inline-grid; grid-template-columns: auto auto; gap: 4px 14px; text-align: left; font-size: 15px; } /* Lista de datos en 2 columnas: nombre del dato y su valor */
+        .musica-card .datos dt { color: #b8aebb; } /* Nombre del dato (Album, Duracion...) en gris */
+        .musica-card .datos dd { margin: 0; } /* Valor del dato sin margen */
+
+        #girar { /* Boton Pausar / Girar disco */
+            margin-top: 18px; /* Separacion arriba */
+            background: transparent; /* Sin relleno */
+            color: #f3ece3; /* Texto claro */
+            border: 1px solid #b19276; /* Borde fino cafe */
+            border-radius: 999px; /* Muy redondeado, forma de pastilla */
+            padding: 6px 16px; /* Espacio interior */
+            cursor: pointer; /* Manita al pasar encima */
+            font-size: 14px; /* Tamaño del texto */
+        } /* Fin de #girar */
+
+        #girar:hover { background: rgba(177,146,118,.2); } /* Al pasar el cursor, se rellena un poco */
+
+        @media (prefers-reduced-motion: reduce) { .vinilo { animation: none; } } /* Si el usuario pidio "menos movimiento" en su sistema, el disco no gira */
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-B/GM4XqrwHnWXNOWMbloTmrYXZg10cakYGmpfsR/bbzQ6JAJI4ihuyADKLnBgrCe" crossorigin="anonymous">
+<script type="module" src="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-1a/pXj49ZQ1aHEmrJ+gMw1otqoVsYwlEnlD8mIfY2TV03r20Y0CN7uqx1tQogjPL" crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <nav class="navbar sm:navbar-expand bg-1 fg-2">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">F_____</a>
+    <button class="btn-icon navbar-toggler" type="button" data-bs-toggle="drawer" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon" aria-hidden="true"></span>
+    </button>
+    <dialog class="drawer drawer-end" tabindex="-1" id="navbarNavAltMarkup" aria-labelledby="navbarNavAltMarkupLabel">
+      <div class="drawer-header">
+        <h5 class="drawer-title" id="navbarNavAltMarkupLabel">Menu</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="drawer" aria-label="Close"></button>
+      </div>
+      <div class="drawer-body">
+        <div class="nav nav-pills navbar-nav">
+          <a class="nav-link active" aria-current="page" href="musica.html">Musica</a>
+          <a class="nav-link" href="series.html">Series</a>
+          <a class="nav-link" href="peliculas.html">Peliculas   </a>
+          <a class="nav-link" href="inicio.html">Inicio</a>
+        </div>
+      </div>
+    </dialog>
+  </div>
+</nav>
+    <main class="contenedor"> <!-- Contenido principal: formulario + tarjeta -->
+
+        <div id="Creador"> <!-- Formulario donde escribes los datos -->
+            <h1>Esto es un creador de tarjetas de música</h1> <!-- Titulo del formulario -->
+
+            <p>Titulo de la musica</p> <!-- Etiqueta del campo -->
+            <input type="text" placeholder="Ingrese el titulo" id="titulo"> <!-- Caja para el titulo; id="titulo" para encontrarla desde JavaScript -->
+
+            <p>Empresa o autor</p> <!-- Etiqueta del campo -->
+            <input type="text" placeholder="Ingrese el autor" id="empresa"> <!-- Caja para el autor -->
+
+            <p>Álbum</p> <!-- Etiqueta del campo -->
+            <input type="text" placeholder="Ingrese el álbum" id="album"> <!-- Caja para el album -->
+
+            <p>Duracion</p> <!-- Etiqueta del campo -->
+            <input type="text" placeholder="Ej. 3:45" id="duracion"> <!-- Caja para la duracion -->
+
+            <p>Año de estreno</p> <!-- Etiqueta del campo -->
+            <input type="text" placeholder="Ej. 2020" id="año"> <!-- Caja para el año -->
+
+            <p>URL de la imagen</p> <!-- Etiqueta del campo -->
+            <input type="text" placeholder="Ingrese la URL de la imagen" id="imagen"> <!-- Caja para el enlace de la imagen -->
+            <p class="ayuda">Esta imagen será el centro del disco.</p> <!-- Texto de ayuda -->
+
+            <p class="error" id="error" role="alert"></p> <!-- Aqui se escriben los avisos de error -->
+            <button id="generar" type="button">Generar Tarjeta</button> <!-- Boton que crea la tarjeta -->
+        </div> <!-- Fin del formulario -->
+
+        <div id="resultado" aria-live="polite"> <!-- Zona donde aparecera la tarjeta; aria-live avisa a lectores de pantalla -->
+            <p class="vacio">Aquí aparecerá tu tarjeta</p> <!-- Mensaje inicial; se reemplaza al generar -->
+        </div> <!-- Fin de la zona de resultado -->
+
+    </main> <!-- Fin del contenido principal -->
+            <script> // Aqui empieza el JavaScript: la logica de la pagina
+        document.addEventListener('DOMContentLoaded', function() { // Espera a que la pagina cargue completa antes de ejecutar lo demas
+
+            const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); // Convierte simbolos peligrosos (< > " ') en texto seguro, para que nadie meta codigo raro en la tarjeta
+            const val = id => document.getElementById(id).value.trim(); // Funcion corta: toma lo escrito en la caja con ese id y le quita espacios de los lados
+            const resultado = document.getElementById('resultado'); // Guarda la zona donde se mostrara la tarjeta
+            const error = document.getElementById('error'); // Guarda el parrafo donde se muestran los errores
+
+            document.getElementById('generar').addEventListener('click', function() { // Cuando se da clic en "Generar Tarjeta", se ejecuta lo de adentro
+
+                const titulo = val('titulo'); // Lee el titulo escrito
+                if (!titulo) { // Si el titulo esta vacio...
+                    error.textContent = 'Escribe el título para generar la tarjeta.'; // ...muestra este aviso
+                    document.getElementById('titulo').focus(); // ...pone el cursor en la caja del titulo
+                    return; // ...y se detiene, no crea la tarjeta
+                } // Fin del if
+                error.textContent = ''; // Si todo esta bien, borra cualquier aviso anterior
+
+                const autor = val('empresa'); // Lee el autor
+                const album = val('album'); // Lee el album
+                const duracion = val('duracion'); // Lee la duracion
+                const anio = val('año'); // Lee el año
+                const imagen = val('imagen'); // Lee la URL de la imagen
+
+                const dato = (etq, v) => v ? `<dt>${etq}</dt><dd>${esc(v)}</dd>` : ''; // Crea una fila "nombre + valor"; si el valor esta vacio, no crea nada
+
+                resultado.innerHTML = `<article class="musica-card"> <!-- Reemplaza el mensaje inicial por la tarjeta -->
+                    <div class="disco"> <!-- Contenedor cuadrado del disco -->
+                        <div class="vinilo" id="vinilo"> <!-- El disco negro que gira -->
+                            <div class="etiqueta"> <!-- Circulo central: la imagen va aqui, sin hueco -->
+                                ${imagen ? `<img src="${esc(imagen)}" alt="Portada de ${esc(titulo)}" referrerpolicy="no-referrer">` : '♪'} <!-- Si pusiste URL, muestra la imagen; si no, muestra ♪ -->
+                            </div> <!-- Fin de la etiqueta -->
+                        </div> <!-- Fin del disco que gira -->
+                        <div class="brillo"></div> <!-- Reflejo de luz fijo (no gira) -->
+                    </div> <!-- Fin del contenedor del disco -->
+                    <div class="info"> <!-- Textos debajo del disco -->
+                        <h2>${esc(titulo)}</h2> <!-- Titulo de la cancion -->
+                        ${autor ? `<p class="autor">${esc(autor)}</p>` : ''} <!-- Autor, solo si lo escribiste -->
+                        <dl class="datos">${dato('Álbum', album)}${dato('Duración', duracion)}${dato('Año', anio)}</dl> <!-- Lista con album, duracion y año -->
+                    </div> <!-- Fin de los textos -->
+                    <button id="girar" type="button">Pausar disco</button> <!-- Boton para pausar o reanudar el giro -->
+                </article>`; // Fin de la tarjeta
+
+                const vinilo = document.getElementById('vinilo'); // Busca el disco recien creado
+                const boton = document.getElementById('girar'); // Busca el boton de pausa recien creado
+
+                boton.addEventListener('click', () => { // Al dar clic en Pausar/Girar...
+                    vinilo.classList.toggle('pausa'); // ...agrega la clase "pausa" si no la tiene, o la quita si ya la tiene
+                    boton.textContent = vinilo.classList.contains('pausa') ? 'Girar disco' : 'Pausar disco'; // ...y cambia el texto del boton segun el estado
+                }); // Fin del clic del boton
+
+                const img = resultado.querySelector('.etiqueta img'); // Busca la imagen del centro (si existe)
+                if (img) img.addEventListener('error', () => { // Si la imagen no carga (URL mala o bloqueada)...
+                    img.replaceWith(document.createTextNode('♪')); // ...la cambia por el simbolo ♪ para no dejar un icono roto
+                }); 
+
+            }); // Fin del clic de "Generar Tarjeta"
+        }); // Fin de DOMContentLoaded
+    </script>
+    </body>
+    </html>

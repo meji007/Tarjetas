@@ -1,0 +1,295 @@
+<!-- Crear un generador de tarjetas de informacion sobre peliculas, series y canciones
+ pide al usuario que llene la siguiente informacion:
+ 1. titulo
+ 2. empresa o autor
+ 3. año de creacion
+ 4 url de la imagen
+ al dar clicc en el boto de generar debes ,pstrar una tarjeta con buen diseño y la imagen de mostrarse 
+ visualmente en lugar del url
+  -->
+
+<!DOCTYPE html> <!-- Le dice al navegador que esto es un documento HTML5 -->
+<html lang="es"> <!-- Inicio de la pagina; lang="es" indica que el idioma es español -->
+<head> <!-- Zona de configuracion: no se ve en la pagina -->
+    <meta charset="UTF-8"> <!-- Permite usar acentos, ñ y emojis sin que se vean raros -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Hace que la pagina se adapte al celular -->
+    <title>Serie</title> <!-- Texto que aparece en la pestaña del navegador -->
+    <link rel="preconnect" href="https://fonts.googleapis.com"> <!-- Adelanta la conexion con Google Fonts para cargar mas rapido -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <!-- Igual, para los archivos de las letras -->
+    <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Oswald:wght@300;400;500;700&display=swap" rel="stylesheet"> <!-- Carga Indie Flower (formulario) y Oswald (letra del poster) -->
+
+    <style> /* Aqui empieza el CSS: el diseño de la pagina */
+
+        * { box-sizing: border-box; } /* El ancho de cada elemento incluye su padding y borde, asi no se salen de su caja */
+
+        body { /* Estilos de toda la pagina */
+            margin: 0; /* Quita el margen blanco que trae el navegador */
+            background: #1d1828; /* Color de fondo: morado muy oscuro */
+            color: #f3ece3; /* Color del texto: blanco calido */
+            font-family: system-ui, -apple-system, "Segoe UI", sans-serif; /* Letra normal del sistema */
+        } /* Fin de body */
+
+        .contenedor { /* Caja que acomoda el formulario y la tarjeta */
+            display: flex; /* Pone los hijos uno al lado del otro */
+            flex-wrap: wrap; /* Si no caben, el segundo baja (util en celular) */
+            gap: 36px; /* Espacio entre el formulario y la tarjeta */
+            align-items: flex-start; /* Los alinea arriba */
+            justify-content: center; /* Los centra horizontalmente */
+            padding: 28px 20px 56px; /* Espacio interior: arriba, lados, abajo */
+        } /* Fin de .contenedor */
+
+        #Creador { /* El formulario (tu caja color cafe) */
+            background-color: #b19276; /* Color de fondo de tu formulario */
+            color: #2a1f17; /* Color del texto dentro del formulario */
+            padding: 20px; /* Espacio interior */
+            border-radius: 10px; /* Esquinas redondeadas */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25); /* Sombra suave debajo */
+            width: 320px; /* Ancho fijo del formulario */
+            font-family: 'Indie Flower', cursive; /* Letra manuscrita */
+        } /* Fin de #Creador */
+
+        #Creador h1 { font-size: 24px; margin: 0 0 6px; font-weight: 400; } /* Titulo del formulario: tamaño, sin margen arriba, sin negritas */
+        #Creador p { margin: 12px 0 3px; font-size: 18px; } /* Las etiquetas (Titulo, Director...): espacio arriba y abajo */
+
+        #Creador input { /* Todas las cajas de texto */
+            width: 100%; /* Ocupan todo el ancho del formulario */
+            padding: 8px 10px; /* Espacio interior para que el texto no pegue en el borde */
+            border: none; /* Sin borde */
+            border-radius: 5px; /* Esquinas redondeadas */
+            font-size: 15px; /* Tamaño de lo que escribes */
+            font-family: system-ui, sans-serif; /* Letra clara y legible para escribir */
+            background: #f6efe7; /* Fondo claro de la caja */
+            color: #2a1f17; /* Color del texto que escribes */
+        } /* Fin de input */
+
+        #Creador input:focus-visible { outline: 2px solid #1d1828; } /* Contorno oscuro cuando haces clic o llegas con el teclado */
+        #Creador .ayuda { font-size: 14px; margin: 2px 0 0; opacity: .8; font-family: system-ui, sans-serif; } /* Texto pequeño de ayuda debajo de un campo */
+        #Creador .error { color: #7a1d12; font-family: system-ui, sans-serif; font-size: 14px; min-height: 18px; margin: 10px 0 0; } /* Mensaje de error en rojo oscuro */
+
+        #generar { /* El boton Generar Tarjeta */
+            background-color: #4CAF50; /* Verde */
+            color: white; /* Texto blanco */
+            padding: 10px 20px; /* Espacio interior del boton */
+            border: none; /* Sin borde */
+            border-radius: 5px; /* Esquinas redondeadas */
+            cursor: pointer; /* El cursor cambia a manita al pasar encima */
+            font-size: 16px; /* Tamaño del texto del boton */
+            margin-top: 6px; /* Separacion con lo de arriba */
+        } /* Fin de #generar */
+
+        #generar:hover { filter: brightness(1.1); } /* Al pasar el cursor, el boton se aclara un poco */
+        #generar:focus-visible { outline: 2px solid #1d1828; outline-offset: 2px; } /* Contorno al usar el teclado */
+
+        #resultado { flex: 1 1 360px; display: flex; justify-content: center; min-height: 200px; } /* Zona donde aparece la tarjeta: crece y centra su contenido */
+
+        .vacio { /* Mensaje que se ve antes de generar */
+            align-self: center; /* Lo centra verticalmente */
+            color: #b8aebb; /* Gris suave */
+            text-align: center; /* Texto centrado */
+            max-width: 30ch; /* Ancho maximo de unos 30 caracteres */
+            font-family: 'Indie Flower', cursive; /* Letra manuscrita */
+            font-size: 24px; /* Tamaño grande */
+        } /* Fin de .vacio */
+
+        /* ================= TARJETA ESTILO POSTER ================= */
+
+        .poster { /* La tarjeta completa */
+            width: 360px; /* Ancho de la tarjeta */
+            max-width: 100%; /* Nunca mas ancha que la pantalla */
+            aspect-ratio: 2 / 3; /* Proporcion de poster: 2 de ancho por 3 de alto (crece si hay mucho texto) */
+            background: #cfcbc4; /* Gris beige del poster */
+            color: #1c1c1c; /* Texto casi negro */
+            padding: 12px 12px 26px; /* Marco: arriba y lados 12px, abajo 26px */
+            font-family: 'Oswald', 'Arial Narrow', sans-serif; /* Letra condensada de poster */
+            box-shadow: 0 10px 28px rgba(0,0,0,.45); /* Sombra para que parezca flotar */
+        } /* Fin de .poster */
+
+        .poster .portada { /* La imagen de arriba */
+            display: block; /* Evita huecos extra debajo de la imagen */
+            width: 100%; /* Ocupa todo el ancho del poster */
+            aspect-ratio: 1.1 / 1; /* Un poco mas ancha que alta */
+            object-fit: cover; /* Llena el espacio recortando sin deformar */
+            background: #9d988f; /* Color de respaldo mientras carga */
+        } /* Fin de .portada */
+
+        .poster .portada.vacia { /* Aviso cuando no hay imagen o no carga */
+            display: grid; /* Para centrar el texto */
+            place-items: center; /* Centra horizontal y verticalmente */
+            text-align: center; /* Texto centrado */
+            padding: 20px; /* Espacio interior */
+            color: #4b4741; /* Gris oscuro */
+            font-size: 15px; /* Tamaño del aviso */
+            font-weight: 300; /* Letra delgada */
+        } /* Fin de .vacia */
+
+        .poster .encabezado { display: flex; align-items: baseline; gap: 14px; margin: 22px 8px 6px; } /* Fila del titulo + año, alineados por la base del texto */
+
+        .poster h2 { /* El titulo */
+            margin: 0; /* Sin margen */
+            font-size: 44px; /* Tamaño grande */
+            line-height: 1; /* Sin espacio extra entre lineas */
+            font-weight: 700; /* Negritas */
+            text-transform: uppercase; /* Todo en mayusculas */
+            overflow-wrap: anywhere; /* Si es larguisimo, se parte en vez de salirse */
+        } /* Fin de h2 */
+
+        .poster .anio { font-size: 28px; font-weight: 400; color: #6f6b64; } /* El año: mas pequeño y en gris */
+
+        .poster .fila { display: grid; grid-template-columns: 92px 1fr; gap: 6px; margin: 10px 8px 0; align-items: baseline; } /* Cada fila: columna de etiqueta (92px) + columna de valores */
+        .poster .fila.reparto { margin-top: 28px; } /* La fila del reparto lleva mas espacio arriba */
+        .poster .etq { font-size: 15px; font-weight: 300; color: #5d5953; } /* La etiqueta (genero, dirigida por...): delgada y gris */
+
+        .poster .vals b { /* Cada nombre de la fila */
+            display: inline-block; /* Permite darle margenes */
+            margin: 0 10px 2px 0; /* Separacion entre un nombre y otro */
+            font-size: 14px; /* Tamaño del nombre */
+            font-weight: 500; /* Grosor medio */
+            text-transform: uppercase; /* En mayusculas */
+        } /* Fin de .vals b */
+    </style> <!-- Aqui termina el CSS -->
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-B/GM4XqrwHnWXNOWMbloTmrYXZg10cakYGmpfsR/bbzQ6JAJI4ihuyADKLnBgrCe" crossorigin="anonymous"> <!-- Estilos de Bootstrap (para la barra de navegacion) -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-1a/pXj49ZQ1aHEmrJ+gMw1otqoVsYwlEnlD8mIfY2TV03r20Y0CN7uqx1tQogjPL" crossorigin="anonymous"></script> <!-- JavaScript de Bootstrap (abre y cierra el menu) -->
+</head> <!-- Fin de la zona de configuracion -->
+
+<body> <!-- Aqui empieza lo que se ve en la pagina -->
+
+    <nav class="navbar sm:navbar-expand bg-1 fg-2"> <!-- Barra de navegacion superior -->
+        <div class="container-fluid"> <!-- Caja que ocupa todo el ancho -->
+            <a class="navbar-brand" href="inicio.html">F_____</a> <!-- Nombre del sitio; lleva a inicio.html -->
+            <button class="btn-icon navbar-toggler" type="button" data-bs-toggle="drawer" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation"> <!-- Boton de menu para celular -->
+                <span class="navbar-toggler-icon" aria-hidden="true"></span> <!-- Icono de las 3 rayitas -->
+            </button> <!-- Fin del boton de menu -->
+            <dialog class="drawer drawer-end" tabindex="-1" id="navbarNavAltMarkup" aria-labelledby="navbarNavAltMarkupLabel"> <!-- Panel lateral que se abre con el boton -->
+                <div class="drawer-header"> <!-- Parte de arriba del panel -->
+                    <h5 class="drawer-title" id="navbarNavAltMarkupLabel">Menu</h5> <!-- Titulo del panel -->
+                    <button type="button" class="btn-close" data-bs-dismiss="drawer" aria-label="Close"></button> <!-- Boton X para cerrarlo -->
+                </div> <!-- Fin de la parte de arriba -->
+                <div class="drawer-body"> <!-- Parte con los enlaces -->
+                    <div class="nav nav-pills navbar-nav"> <!-- Lista de enlaces -->
+                        <a class="nav-link" href="peliculas.html">peliculas</a> <!-- Enlace a peliculas -->
+                        <a class="nav-link active" aria-current="page" href="series.html">series</a> <!-- Enlace a series -->
+                        <a class="nav-link" href="musica.html">Musica</a> <!-- Enlace a musica -->
+                    </div> <!-- Fin de la lista -->
+                </div> <!-- Fin de la parte con enlaces -->
+            </dialog> <!-- Fin del panel lateral -->
+        </div> <!-- Fin de la caja ancha -->
+    </nav> <!-- Fin de la barra de navegacion -->
+
+    <main class="contenedor"> <!-- Contenido principal: formulario + tarjeta -->
+
+        <div id="Creador"> <!-- Formulario donde escribes los datos -->
+            <h1>Esto es un creador de tarjetas de series</h1> <!-- Titulo del formulario -->
+            <p>Titulo de la serie</p> <!-- Etiqueta del campo -->
+            <input type="text" placeholder="Ingrese el titulo" id="titulo"> <!-- Caja de texto; id="titulo" para encontrarla desde JavaScript -->
+
+            <p>Año de estreno</p> <!-- Etiqueta del campo -->
+            <input type="text" placeholder="Ej. 2016" id="año"> <!-- Caja de texto; id="año" para encontrarla desde JavaScript -->
+
+            <p>Género</p> <!-- Etiqueta del campo -->
+            <input type="text" placeholder="Ej. Ciencia ficción, Drama" id="genero"> <!-- Caja de texto; id="genero" para encontrarla desde JavaScript -->
+            <p class="ayuda">Puedes separar varios con comas.</p> <!-- Texto de ayuda -->
+
+            <p>Creada por</p> <!-- Etiqueta del campo -->
+            <input type="text" placeholder="Ingrese el creador" id="director"> <!-- Caja de texto; id="director" para encontrarla desde JavaScript -->
+
+            <p>Empresa o productora</p> <!-- Etiqueta del campo -->
+            <input type="text" placeholder="Ingrese la empresa" id="empresa"> <!-- Caja de texto; id="empresa" para encontrarla desde JavaScript -->
+            <p class="ayuda">Separa varias con comas.</p> <!-- Texto de ayuda -->
+
+            <p>Temporadas</p> <!-- Etiqueta del campo -->
+            <input type="text" placeholder="Ej. 4 temporadas" id="temporadas"> <!-- Caja de texto; id="temporadas" para encontrarla desde JavaScript -->
+
+            <p>Reparto</p> <!-- Etiqueta del campo -->
+            <input type="text" placeholder="Ingrese los actores" id="reparto"> <!-- Caja de texto; id="reparto" para encontrarla desde JavaScript -->
+            <p class="ayuda">Separa los nombres con comas.</p> <!-- Texto de ayuda -->
+
+            <p>URL de la imagen</p> <!-- Etiqueta del campo -->
+            <input type="text" placeholder="Ingrese la URL de la imagen" id="imagen"> <!-- Caja de texto; id="imagen" para encontrarla desde JavaScript -->
+            <p class="error" id="error" role="alert"></p> <!-- Aqui se escriben los avisos de error -->
+            <button id="generar" type="button">Generar Tarjeta</button> <!-- Boton que crea la tarjeta -->
+        </div> <!-- Fin del formulario -->
+
+        <div id="resultado" aria-live="polite"> <!-- Zona donde aparecera la tarjeta -->
+            <p class="vacio">Aquí aparecerá tu tarjeta</p> <!-- Mensaje inicial; se reemplaza al generar -->
+        </div> <!-- Fin de la zona de resultado -->
+
+    </main> <!-- Fin del contenido principal -->
+
+    <script> // Aqui empieza el JavaScript
+
+        // ---------- Funciones de ayuda (se usan al armar la tarjeta) ----------
+
+        function limpiar(texto) { // Convierte simbolos peligrosos en texto seguro para que nadie meta codigo raro
+            return texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); // Cambia & < > y comillas por su version segura
+        } // Fin de limpiar
+
+        function crearFila(etiqueta, texto, clase) { // Arma una fila del poster (ejemplo: "dirigida por  GORE VERBINSKI")
+            if (texto === '') { // Si no escribiste nada en ese campo...
+                return ''; // ...no crea la fila
+            } // Fin del if
+            const nombres = texto.split(','); // Parte el texto en una lista cada vez que hay una coma
+            let nombresHTML = ''; // Aqui se iran juntando los nombres ya en HTML
+            for (let i = 0; i < nombres.length; i++) { // Recorre la lista de nombres uno por uno
+                const nombre = nombres[i].trim(); // Quita espacios de los lados del nombre
+                if (nombre !== '') { // Si el nombre no esta vacio...
+                    nombresHTML = nombresHTML + '<b>' + limpiar(nombre) + '</b>'; // ...lo agrega dentro de una etiqueta <b>
+                } // Fin del if
+            } // Fin del for
+            if (nombresHTML === '') { // Si al final no quedo ningun nombre (por ejemplo solo escribiste comas)...
+                return ''; // ...no crea la fila
+            } // Fin del if
+            return '<div class="fila ' + clase + '"><span class="etq">' + etiqueta + '</span><span class="vals">' + nombresHTML + '</span></div>'; // Devuelve la fila completa: etiqueta + nombres
+        } // Fin de crearFila
+
+        // ---------- Lo que pasa al dar clic en "Generar Tarjeta" ----------
+
+        document.querySelector('#generar').addEventListener('click', function() { // Busca el boton Generar y le dice: cuando le den clic, ejecuta esto
+            const titulo = document.getElementById('titulo').value.trim(); // Lee el titulo escrito
+            const empresa = document.getElementById('empresa').value.trim(); // Lee la empresa o productora
+            const año = document.getElementById('año').value.trim(); // Lee el año
+            const genero = document.getElementById('genero').value.trim(); // Lee el genero
+            const creador = document.getElementById('director').value.trim(); // Lee el creador
+            const temporadas = document.getElementById('temporadas').value.trim(); // Lee las temporadas
+            const reparto = document.getElementById('reparto').value.trim(); // Lee los actores
+            const imagen = document.getElementById('imagen').value.trim(); // Lee la URL de la imagen
+
+            if (titulo === '') { // Si el titulo esta vacio...
+                document.getElementById('error').textContent = 'Escribe el título para generar la tarjeta.'; // ...muestra este aviso
+                document.getElementById('titulo').focus(); // ...pone el cursor en la caja del titulo
+                return; // ...y se detiene, no crea la tarjeta
+            } // Fin del if
+            document.getElementById('error').textContent = ''; // Si todo esta bien, borra cualquier aviso anterior
+
+            let imagenHTML; // Aqui se guardara el HTML de la imagen
+            if (imagen !== '') { // Si escribiste una URL...
+                imagenHTML = '<img class="portada" src="' + limpiar(imagen) + '" alt="Imagen de ' + limpiar(titulo) + '" referrerpolicy="no-referrer">'; // ...crea una etiqueta <img> con esa URL: asi se ve la imagen y no el enlace
+            } else { // Si no escribiste URL...
+                imagenHTML = '<div class="portada vacia">Sin imagen</div>'; // ...muestra un cuadro con el texto "Sin imagen"
+            } // Fin del if / else
+
+            let anioHTML = ''; // Aqui se guardara el HTML del año
+            if (año !== '') { // Si escribiste un año...
+                anioHTML = '<span class="anio">' + limpiar(año) + '</span>'; // ...crea el texto del año
+            } // Fin del if
+
+            const filas = crearFila('género', genero, '') + crearFila('creada por', creador, '') + crearFila('producida por', empresa, '') + crearFila('temporadas', temporadas, '') + crearFila('reparto', reparto, 'reparto'); // Arma todas las filas del poster y las junta en un solo texto
+
+            document.getElementById('resultado').innerHTML = // Mete la tarjeta dentro de la zona de resultado (reemplaza el mensaje inicial)
+                '<article class="poster">' + // Abre la tarjeta
+                    imagenHTML + // Pone la imagen arriba
+                    '<div class="encabezado"><h2>' + limpiar(titulo) + '</h2>' + anioHTML + '</div>' + // Pone el titulo grande y el año a su lado
+                    filas + // Pone las filas (genero, director, reparto...)
+                '</article>'; // Cierra la tarjeta
+
+            const img = document.querySelector('#resultado img.portada'); // Busca la imagen recien creada (si existe)
+            if (img) { // Si hay imagen...
+                img.addEventListener('error', function() { // ...y si falla al cargar (URL mala o bloqueada)...
+                    img.outerHTML = '<div class="portada vacia">No se pudo cargar la imagen. Revisa que la URL sea directa a una imagen.</div>'; // ...la cambia por un aviso para no dejar un icono roto
+                }); // Fin del aviso de error
+            } // Fin del if
+
+        }); // Fin del clic de "Generar Tarjeta"
+    </script> <!-- Aqui termina el JavaScript -->
+</body> <!-- Fin de lo visible -->
+</html> <!-- Fin de la pagina -->

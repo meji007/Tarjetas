@@ -1,0 +1,276 @@
+<!-- Crear un generador de tarjetas de informacion sobre peliculas, series y canciones
+ pide al usuario que llene la siguiente informacion:
+ 1. titulo
+ 2. empresa o autor
+ 3. año de creacion
+ 4 url de la imagen
+ al dar clicc en el boto de generar debes ,pstrar una tarjeta con buen diseño y la imagen de mostrarse 
+ visualmente en lugar del url
+  -->
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>peliculas</title>
+<style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            background: #1d1828;
+            color: #f3ece3;
+            font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        }
+        .contenedor {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 36px;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 28px 20px 56px;
+        }
+        #Creador {
+            background-color: #b19276;
+            color: #2a1f17;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+            width: 320px;
+            font-family: 'Indie Flower', cursive;
+        }
+        #Creador h1 { font-size: 24px; margin: 0 0 6px; font-weight: 400; }
+        #Creador p { margin: 12px 0 3px; font-size: 18px; }
+        #Creador input {
+            width: 100%;
+            padding: 8px 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 15px;
+            font-family: system-ui, sans-serif;
+            background: #f6efe7;
+            color: #2a1f17;
+        }
+        #Creador input:focus-visible { outline: 2px solid #1d1828; }
+        #Creador .ayuda { font-size: 14px; margin: 2px 0 0; opacity: .8; font-family: system-ui, sans-serif; }
+        #Creador .error { color: #7a1d12; font-family: system-ui, sans-serif; font-size: 14px; min-height: 18px; margin: 10px 0 0; }
+        #generar {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 6px;
+        }
+        #generar:hover { filter: brightness(1.1); }
+        #generar:focus-visible { outline: 2px solid #1d1828; outline-offset: 2px; }
+        #resultado { flex: 1 1 360px; display: flex; justify-content: center; min-height: 200px; }
+        .vacio {
+            align-self: center;
+            color: #b8aebb;
+            text-align: center;
+            max-width: 30ch;
+            font-family: 'Indie Flower', cursive;
+            font-size: 24px;
+        }
+
+        /* Tarjeta estilo poster */
+        .poster {
+            width: 360px;
+            max-width: 100%;
+            aspect-ratio: 2 / 3;
+            background: #cfcbc4;
+            color: #1c1c1c;
+            padding: 12px 12px 26px;
+            font-family: 'Oswald', 'Arial Narrow', sans-serif;
+            box-shadow: 0 10px 28px rgba(0,0,0,.45);
+        }
+        .poster .portada {
+            display: block;
+            width: 100%;
+            aspect-ratio: 1.1 / 1;
+            object-fit: cover;
+            background: #9d988f;
+        }
+        .poster .portada.vacia {
+            display: grid;
+            place-items: center;
+            text-align: center;
+            padding: 20px;
+            color: #4b4741;
+            font-size: 15px;
+            font-weight: 300;
+        }
+        .poster .encabezado {
+            display: flex;
+            align-items: baseline;
+            gap: 14px;
+            margin: 22px 8px 6px;
+        }
+        .poster h2 {
+            margin: 0;
+            font-size: 44px;
+            line-height: 1;
+            font-weight: 700;
+            text-transform: uppercase;
+            overflow-wrap: anywhere;
+        }
+        .poster .anio { font-size: 28px; font-weight: 400; color: #6f6b64; }
+        .poster .fila {
+            display: grid;
+            grid-template-columns: 92px 1fr;
+            gap: 6px;
+            margin: 10px 8px 0;
+            align-items: baseline;
+        }
+        .poster .fila.reparto { margin-top: 28px; }
+        .poster .etq { font-size: 15px; font-weight: 300; color: #5d5953; }
+        .poster .vals b {
+            display: inline-block;
+            margin: 0 10px 2px 0;
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: .01em;
+        }
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-B/GM4XqrwHnWXNOWMbloTmrYXZg10cakYGmpfsR/bbzQ6JAJI4ihuyADKLnBgrCe" crossorigin="anonymous">
+<script type="module" src="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-1a/pXj49ZQ1aHEmrJ+gMw1otqoVsYwlEnlD8mIfY2TV03r20Y0CN7uqx1tQogjPL" crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <nav class="navbar sm:navbar-expand bg-1 fg-2">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">F_____</a>
+    <button class="btn-icon navbar-toggler" type="button" data-bs-toggle="drawer" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon" aria-hidden="true"></span>
+    </button>
+    <dialog class="drawer drawer-end" tabindex="-1" id="navbarNavAltMarkup" aria-labelledby="navbarNavAltMarkupLabel">
+      <div class="drawer-header">
+        <h5 class="drawer-title" id="navbarNavAltMarkupLabel">Menu</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="drawer" aria-label="Close"></button>
+      </div>
+      <div class="drawer-body">
+        <div class="nav nav-pills navbar-nav">
+          <a class="nav-link active" aria-current="page" href="peliculas.html">Peliculas</a>
+          <a class="nav-link" href="series.html">Series</a>
+          <a class="nav-link" href="musica.html">Musica</a>
+          <a class="nav-link" href="inicio.html">Inicio</a>
+        </div>
+      </div>
+    </dialog>
+  </div>
+</nav>
+         <main class="contenedor"> <!-- Contenido principal: formulario + tarjeta -->
+
+        <div id="Creador"> <!-- Formulario donde escribes los datos -->
+            <h1>Esto es un creador de tarjetas de películas</h1> <!-- Titulo del formulario -->
+            <p>Titulo de la película</p> <!-- Etiqueta del campo -->
+            <input type="text" placeholder="Ingrese el titulo" id="titulo"> <!-- Caja de texto; id="titulo" para encontrarla desde JavaScript -->
+
+            <p>Año de estreno</p> <!-- Etiqueta del campo -->
+            <input type="text" placeholder="Ej. 2011" id="año"> <!-- Caja de texto; id="año" para encontrarla desde JavaScript -->
+
+            <p>Género</p> <!-- Etiqueta del campo -->
+            <input type="text" placeholder="Ej. Comedia, Drama" id="genero"> <!-- Caja de texto; id="genero" para encontrarla desde JavaScript -->
+            <p class="ayuda">Puedes separar varios con comas.</p> <!-- Texto de ayuda -->
+
+            <p>Dirigida por</p> <!-- Etiqueta del campo -->
+            <input type="text" placeholder="Ingrese el director" id="director"> <!-- Caja de texto; id="director" para encontrarla desde JavaScript -->
+
+            <p>Empresa o productores</p> <!-- Etiqueta del campo -->
+            <input type="text" placeholder="Ingrese la empresa o productores" id="empresa"> <!-- Caja de texto; id="empresa" para encontrarla desde JavaScript -->
+            <p class="ayuda">Separa varios con comas.</p> <!-- Texto de ayuda -->
+
+            <p>Reparto</p> <!-- Etiqueta del campo -->
+            <input type="text" placeholder="Ingrese los actores" id="reparto"> <!-- Caja de texto; id="reparto" para encontrarla desde JavaScript -->
+            <p class="ayuda">Separa los nombres con comas.</p> <!-- Texto de ayuda -->
+
+            <p>URL de la imagen</p> <!-- Etiqueta del campo -->
+            <input type="text" placeholder="Ingrese la URL de la imagen" id="imagen"> <!-- Caja de texto; id="imagen" para encontrarla desde JavaScript -->
+            <p class="error" id="error" role="alert"></p> <!-- Aqui se escriben los avisos de error -->
+            <button id="generar" type="button">Generar Tarjeta</button> <!-- Boton que crea la tarjeta -->
+        </div> <!-- Fin del formulario -->
+
+        <div id="resultado" aria-live="polite"> <!-- Zona donde aparecera la tarjeta -->
+            <p class="vacio">Aquí aparecerá tu tarjeta</p> <!-- Mensaje inicial; se reemplaza al generar -->
+        </div> <!-- Fin de la zona de resultado -->
+
+    </main> <!-- Fin del contenido principal -->
+    <script> // Aqui empieza el JavaScript
+
+        // ---------- Funciones de ayuda (se usan al armar la tarjeta) ----------
+
+        function limpiar(texto) { // Convierte simbolos peligrosos en texto seguro para que nadie meta codigo raro
+            return texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); // Cambia & < > y comillas por su version segura
+        } // Fin de limpiar
+
+        function crearFila(etiqueta, texto, clase) { // Arma una fila del poster (ejemplo: "dirigida por  GORE VERBINSKI")
+            if (texto === '') { // Si no escribiste nada en ese campo...
+                return ''; // ...no crea la fila
+            } // Fin del if
+            const nombres = texto.split(','); // Parte el texto en una lista cada vez que hay una coma
+            let nombresHTML = ''; // Aqui se iran juntando los nombres ya en HTML
+            for (let i = 0; i < nombres.length; i++) { // Recorre la lista de nombres uno por uno
+                const nombre = nombres[i].trim(); // Quita espacios de los lados del nombre
+                if (nombre !== '') { // Si el nombre no esta vacio...
+                    nombresHTML = nombresHTML + '<b>' + limpiar(nombre) + '</b>'; // ...lo agrega dentro de una etiqueta <b>
+                } // Fin del if
+            } // Fin del for
+            if (nombresHTML === '') { // Si al final no quedo ningun nombre (por ejemplo solo escribiste comas)...
+                return ''; // ...no crea la fila
+            } // Fin del if
+            return '<div class="fila ' + clase + '"><span class="etq">' + etiqueta + '</span><span class="vals">' + nombresHTML + '</span></div>'; // Devuelve la fila completa: etiqueta + nombres
+        } // Fin de crearFila
+
+        // ---------- Lo que pasa al dar clic en "Generar Tarjeta" ----------
+
+        document.querySelector('#generar').addEventListener('click', function() { // Busca el boton Generar y le dice: cuando le den clic, ejecuta esto
+            const titulo = document.getElementById('titulo').value.trim(); // Lee el titulo escrito
+            const empresa = document.getElementById('empresa').value.trim(); // Lee la empresa o productores
+            const año = document.getElementById('año').value.trim(); // Lee el año
+            const genero = document.getElementById('genero').value.trim(); // Lee el genero
+            const director = document.getElementById('director').value.trim(); // Lee el director
+            const reparto = document.getElementById('reparto').value.trim(); // Lee los actores
+            const imagen = document.getElementById('imagen').value.trim(); // Lee la URL de la imagen
+
+            if (titulo === '') { // Si el titulo esta vacio...
+                document.getElementById('error').textContent = 'Escribe el título para generar la tarjeta.'; // ...muestra este aviso
+                document.getElementById('titulo').focus(); // ...pone el cursor en la caja del titulo
+                return; // ...y se detiene, no crea la tarjeta
+            } // Fin del if
+            document.getElementById('error').textContent = ''; // Si todo esta bien, borra cualquier aviso anterior
+
+            let imagenHTML; // Aqui se guardara el HTML de la imagen
+            if (imagen !== '') { // Si escribiste una URL...
+                imagenHTML = '<img class="portada" src="' + limpiar(imagen) + '" alt="Imagen de ' + limpiar(titulo) + '" referrerpolicy="no-referrer">'; // ...crea una etiqueta <img> con esa URL: asi se ve la imagen y no el enlace
+            } else { // Si no escribiste URL...
+                imagenHTML = '<div class="portada vacia">Sin imagen</div>'; // ...muestra un cuadro con el texto "Sin imagen"
+            } // Fin del if / else
+
+            let anioHTML = ''; // Aqui se guardara el HTML del año
+            if (año !== '') { // Si escribiste un año...
+                anioHTML = '<span class="anio">' + limpiar(año) + '</span>'; // ...crea el texto del año
+            } // Fin del if
+
+            const filas = crearFila('género', genero, '') + crearFila('dirigida por', director, '') + crearFila('producida por', empresa, '') + crearFila('reparto', reparto, 'reparto'); // Arma todas las filas del poster y las junta en un solo texto
+
+            document.getElementById('resultado').innerHTML = // Mete la tarjeta dentro de la zona de resultado (reemplaza el mensaje inicial)
+                '<article class="poster">' + // Abre la tarjeta
+                    imagenHTML + // Pone la imagen arriba
+                    '<div class="encabezado"><h2>' + limpiar(titulo) + '</h2>' + anioHTML + '</div>' + // Pone el titulo grande y el año a su lado
+                    filas + // Pone las filas (genero, director, reparto...)
+                '</article>'; // Cierra la tarjeta
+
+            const img = document.querySelector('#resultado img.portada'); // Busca la imagen recien creada (si existe)
+            if (img) { // Si hay imagen...
+                img.addEventListener('error', function() { // ...y si falla al cargar (URL mala o bloqueada)...
+                    img.outerHTML = '<div class="portada vacia">No se pudo cargar la imagen. Revisa que la URL sea directa a una imagen.</div>'; // ...la cambia por un aviso para no dejar un icono roto
+                }); // Fin del aviso de error
+            } // Fin del if
+
+        }); // Fin del clic de "Generar Tarjeta"
+    </script>
+    </body>
+    </html>
